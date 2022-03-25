@@ -2,3 +2,5 @@
 /secrets/*
 !/secrets/.keep
 /config/traefik/*
+deployments/traefik/005-traefik-dashboard-ingressroute.yaml
+helm/prometheus/grafana-ingressroute.yaml
