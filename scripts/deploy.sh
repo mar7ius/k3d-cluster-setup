@@ -33,7 +33,6 @@ info_and_exec "Verify that kubectl is setup/working" "kubectl get nodes"
 
 section "Deploying Traefik"
 
-# info_pause_exec "deploy traefik" "kubectl apply -f ./traefik/"
 info_and_exec "Apply Custom Ressources Definitions:" "kubectl apply -f ./deployments/traefik/001-traefik-crd.yaml"
 info_and_exec "Apply RBAC:" "kubectl apply -f ./deployments/traefik/001-traefik-rbac.yaml"
 info_and_exec "Apply Secrets:" "kubectl apply -f ./secrets/traefik/002-traefik-cloudflare-secrets.yaml"
@@ -67,5 +66,18 @@ section "Deploying PostgreSQL"
 info_and_exec "Create a db namespace:" "kubectl create namespace db"
 exe "helm repo add bitnami https://charts.bitnami.com/bitnami"
 exe "helm repo update"
-info_and_exec "Install Bitnami Helm chart" "helm install pgsql --namespace db -f ./helm/postgresql/bitnami-postgresql-values.yaml bitnami/postgresql"
+info_and_exec "Install Bitnami's PostgreSQL Helm chart" "helm install pgsql --namespace db -f ./helm/postgresql/bitnami-postgresql-values.yaml bitnami/postgresql"
 printf "Checking the pods.. \n\n $(kubectl get pods -n db)\n\n"
+
+
+############
+# DEPLOY REDIS
+############
+
+section "Deploying Redis"
+info_and_exec "Install Bitnami's Redis Helm chart" "helm install redis --namespace db -f ./helm/redis/bitnami-redis-values.yaml bitnami/redis"
+printf "Checking the pods.. \n\n $(kubectl get pods -n db)\n\n"
+
+
+############
+printf "\n\n done ! \n\n"
