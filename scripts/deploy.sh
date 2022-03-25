@@ -57,3 +57,15 @@ exe "helm repo update"
 info_and_exec "Install kube-prometheus-stack helm chart:" "helm install prometheus --namespace monitoring -f ./helm/prometheus/kube-prometheus-stack-values.yaml prometheus-community/kube-prometheus-stack"
 printf "Checking the pods.. \n\n $(kubectl get pods -n monitoring)\n\n"
 info_and_exec "exposing prometheus via ingressroute" "kubectl apply -f ./helm/prometheus/grafana-ingressroute.yaml"
+
+
+############
+# DEPLOY POSTGRESQL
+############
+
+section "Deploying PostgreSQL"
+info_and_exec "Create a db namespace:" "kubectl create namespace db"
+exe "helm repo add bitnami https://charts.bitnami.com/bitnami"
+exe "helm repo update"
+info_and_exec "Install Bitnami Helm chart" "helm install pgsql --namespace db -f ./helm/postgresql/bitnami-postgresql-values.yaml bitnami/postgresql"
+printf "Checking the pods.. \n\n $(kubectl get pods -n db)\n\n"
