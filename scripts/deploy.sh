@@ -36,7 +36,7 @@ section "Deploying Traefik"
 # info_pause_exec "deploy traefik" "kubectl apply -f ./traefik/"
 info_and_exec "Apply Custom Ressources Definitions:" "kubectl apply -f ./deployments/traefik/001-traefik-crd.yaml"
 info_and_exec "Apply RBAC:" "kubectl apply -f ./deployments/traefik/001-traefik-rbac.yaml"
-info_and_exec "Apply Secrets:" "kubectl apply -f ./secrets/traefik/002-traefik-secrets.yaml"
+info_and_exec "Apply Secrets:" "kubectl apply -f ./secrets/traefik/002-traefik-cloudflare-secrets.yaml"
 info_and_exec "Apply Service:" "kubectl apply -f ./deployments/traefik/003-traefik-service.yaml"
 info_and_exec "Apply ServiceAccount & Deployment:" "kubectl apply -f ./deployments/traefik/004-traefik-deployment.yaml"
 info_and_exec "Waiting 10sec for resources to deploy correctly.." "sleep 10"
@@ -44,3 +44,16 @@ printf "\n\n$(kubectl get pods -n kube-system)\n\n"
 info_and_exec "Apply ingressroute for Traefik Dashboard:" "kubectl apply -f ./deployments/traefik/005-traefik-dashboard-ingressroute.yaml"
 
 printf "\n Traefik is deployed.\n"
+
+############
+# DEPLOY PROMETHEUS & GRAFANA
+############
+
+section "Deploying Prometheus & Grafana"
+exe "kubens default"
+info_and_exec "Creating a monitoring namespace for prometheus:" "kubectl create namespace monitoring"
+exe "helm repo add prometheus-community https://prometheus-community.github.io/helm-charts"
+exe "helm repo update"
+info_and_exec "Install kube-prometheus-stack helm chart:" "helm install prometheus --namespace monitoring -f ./helm/prometheus/kube-prometheus-stack-values.yaml prometheus-community/kube-prometheus-stack"
+printf "Checking the pods.. \n\n $(kubectl get pods -n monitoring)\n\n"
+info_and_exec "exposing prometheus via ingressroute" "kubectl apply -f ./helm/prometheus/grafana-ingressroute.yaml"
