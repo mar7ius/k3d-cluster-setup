@@ -50,6 +50,12 @@ function info_pause_exec() {
   exe "$2"
   echo ""
 }
+function info_and_exec() {
+  step "$1"
+  read -r $'\033[1;37m#\033[0m'" Command: "$'\033[1;96m'"$2"$'\033[0m'""
+  exe "$2"
+  echo ""
+}
 
 # show command and execute it
 exe() {
@@ -63,3 +69,9 @@ section() {
   log "***** Section: ${MGT}$1${END} *****";
   echo ""
 }
+
+# highlight the next step
+step() { log "Step: ${BLU}$1${END}"; }
+
+# output a "log" line with bold leading >>>
+log() { >&2 printf "${BLOCK}#${END} $1\n"; }
