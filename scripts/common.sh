@@ -52,7 +52,7 @@ function info_pause_exec() {
 }
 function info_and_exec() {
   step "$1"
-  read -r $'\033[1;37m#\033[0m'" Command: "$'\033[1;96m'"$2"$'\033[0m'""
+  log "Command: ${GRN}$2${END}"
   exe "$2"
   echo ""
 }

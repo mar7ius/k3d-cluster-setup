@@ -45,20 +45,6 @@ info_and_exec "Apply ingressroute for Traefik Dashboard:" "kubectl apply -f ./de
 printf "\n Traefik is deployed.\n"
 
 ############
-# DEPLOY PROMETHEUS & GRAFANA
-############
-
-section "Deploying Prometheus & Grafana"
-exe "kubens default"
-info_and_exec "Creating a monitoring namespace for prometheus:" "kubectl create namespace monitoring"
-exe "helm repo add prometheus-community https://prometheus-community.github.io/helm-charts"
-exe "helm repo update"
-info_and_exec "Install kube-prometheus-stack helm chart:" "helm install prometheus --namespace monitoring -f ./helm/prometheus/kube-prometheus-stack-values.yaml prometheus-community/kube-prometheus-stack"
-printf "Checking the pods.. \n\n $(kubectl get pods -n monitoring)\n\n"
-info_and_exec "exposing prometheus via ingressroute" "kubectl apply -f ./helm/prometheus/grafana-ingressroute.yaml"
-
-
-############
 # DEPLOY POSTGRESQL
 ############
 
@@ -78,6 +64,18 @@ section "Deploying Redis"
 info_and_exec "Install Bitnami's Redis Helm chart" "helm install redis --namespace db -f ./helm/redis/bitnami-redis-values.yaml bitnami/redis"
 printf "Checking the pods.. \n\n $(kubectl get pods -n db)\n\n"
 
+############
+# DEPLOY PROMETHEUS & GRAFANA
+############
+
+section "Deploying Prometheus & Grafana"
+exe "kubens default"
+info_and_exec "Creating a monitoring namespace for prometheus:" "kubectl create namespace monitoring"
+exe "helm repo add prometheus-community https://prometheus-community.github.io/helm-charts"
+exe "helm repo update"
+info_and_exec "Install kube-prometheus-stack helm chart:" "helm install prometheus --namespace monitoring -f ./helm/prometheus/kube-prometheus-stack-values.yaml prometheus-community/kube-prometheus-stack"
+printf "Checking the pods.. \n\n $(kubectl get pods -n monitoring)\n\n"
+info_and_exec "exposing prometheus via ingressroute" "kubectl apply -f ./helm/prometheus/grafana-ingressroute.yaml"
 
 ############
 printf "\n\n done ! \n\n"
