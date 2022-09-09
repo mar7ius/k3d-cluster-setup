@@ -23,8 +23,6 @@ spec:
     metadata:
       labels:
         app: traefik
-      # annotations:
-      #   container.apparmor.security.beta.kubernetes.io/traefik: runtime/default
     spec:
       serviceAccountName: traefik-ingress-controller
       securityContext:
@@ -40,7 +38,7 @@ spec:
               mountPath: /etc/traefik
       containers:
         - name: traefik
-          image: traefik:v2.6.1
+          image: traefik:v2.8.4
           securityContext:
             readOnlyRootFilesystem: true
             runAsNonRoot: true

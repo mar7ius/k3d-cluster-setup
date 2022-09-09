@@ -4,4 +4,4 @@
 /config/traefik/*
 deployments/traefik/005-traefik-dashboard-ingressroute.yaml
 helm/prometheus/grafana-ingressroute.yaml
-deployments/traefik_2.8.4/005-traefik-dashboard-ingressroute.yaml
+deployments/*/005-traefik-dashboard-ingressroute.yaml
