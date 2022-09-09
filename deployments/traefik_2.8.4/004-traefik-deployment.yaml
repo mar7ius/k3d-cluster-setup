@@ -1,0 +1,85 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: kube-system
+  name: traefik-ingress-controller
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: kube-system
+  name: traefik
+  labels:
+    app: traefik
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: traefik-ingress-controller
+      securityContext:
+        # Use nogroup (and needs nobody) for the acme.json file
+        # for storing TLS
+        fsGroup: 65534
+      initContainers:
+        - name: volume-permissions
+          image: busybox:1.32
+          command: ['sh', '-c', 'chown 65534:65534 /etc/traefik/certs/*.json && chmod 600 /etc/traefik/certs/*.json']
+          volumeMounts:
+            - name: traefik-config-folder
+              mountPath: /etc/traefik
+      containers:
+        - name: traefik
+          image: traefik:v2.8.4
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            # Run the container as nobody:nogroup
+            runAsUser: 65534
+            runAsGroup: 65534
+            capabilities:
+              drop:
+                - ALL
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ping
+              port: 9080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+          resources:
+            limits:
+              memory: '100Mi'
+              cpu: '1000m'
+          ports:
+            # The Traefik container is listening on ports > 1024 so the container
+            # can be run as a non-root user and they can bind to these ports.
+            - name: web
+              containerPort: 8080
+            - name: websecure
+              containerPort: 8443
+            - name: admin
+              containerPort: 9080
+          volumeMounts:
+            - name: traefik-config-folder
+              mountPath: /etc/traefik
+          env:
+            - name: CF_DNS_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: apiKey
+                  name: cloudflare-credentials
+      volumes:
+        - name: traefik-config-folder
+          hostPath:
+            path: /etc/traefik # Mounted on cluster creation from host in all nodes
